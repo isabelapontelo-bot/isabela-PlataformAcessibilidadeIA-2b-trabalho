@@ -1,0 +1,251 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Dicionário por Voz - Plataforma de Acessibilidade</title>
+    <style>
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+        }
+
+        :root {
+            --bg-color: #0f172a;
+            --card-bg: #1e293b;
+            --card-border: #334155;
+            --text-main: #ffffff;
+            --text-sub: #cbd5e1;
+            --accent-yellow: #facc15;
+            --accent-blue: #38bdf8;
+            --accent-green: #4ade80;
+            --focus-ring: #facc15;
+            --danger-red: #ef4444;
+        }
+
+        body {
+            font-family: Arial, Helvetica, sans-serif;
+            background-color: var(--bg-color);
+            color: var(--text-main);
+            line-height: 1.6;
+            padding: 20px;
+        }
+
+        .container {
+            max-width: 800px;
+            margin: 0 auto;
+        }
+
+        header {
+            margin-bottom: 30px;
+            border-bottom: 2px solid var(--card-border);
+            padding-bottom: 20px;
+            text-align: center;
+        }
+
+        header h1 {
+            font-size: 2.2rem;
+            color: var(--accent-green);
+            margin-bottom: 10px;
+        }
+
+        .back-link {
+            display: inline-block;
+            color: var(--accent-yellow);
+            text-decoration: underline;
+            font-size: 1.1rem;
+            margin-bottom: 15px;
+            font-weight: bold;
+        }
+
+        .game-card {
+            background-color: var(--card-bg);
+            border: 3px solid var(--card-border);
+            border-radius: 12px;
+            padding: 30px;
+            text-align: center;
+        }
+
+        .status-box {
+            background-color: #000000;
+            border: 2px solid var(--accent-green);
+            border-radius: 8px;
+            padding: 20px;
+            font-size: 1.3rem;
+            margin: 20px 0;
+            color: var(--accent-yellow);
+            min-height: 100px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .controls {
+            display: flex;
+            flex-direction: column;
+            gap: 15px;
+            margin-top: 25px;
+        }
+
+        .btn {
+            background-color: var(--accent-green);
+            color: #000000;
+            font-size: 1.25rem;
+            font-weight: bold;
+            padding: 18px 24px;
+            border: 3px solid #ffffff;
+            border-radius: 8px;
+            cursor: pointer;
+            transition: background-color 0.2s;
+            width: 100%;
+        }
+
+        .btn:hover, .btn:focus {
+            background-color: #ffffff;
+            outline: 4px solid var(--focus-ring);
+        }
+
+        .btn-record {
+            background-color: var(--accent-yellow);
+        }
+
+        .btn-record.recording {
+            background-color: var(--danger-red);
+            color: #ffffff;
+            animation: pulse 1.5s infinite;
+        }
+
+        @keyframes pulse {
+            0% { opacity: 1; }
+            50% { opacity: 0.6; }
+            100% { opacity: 1; }
+        }
+
+        .transcript-box {
+            margin-top: 15px;
+            font-size: 1.1rem;
+            color: var(--text-sub);
+        }
+    </style>
+</head>
+<body>
+
+    <div class="container">
+        <a href="index.html" class="back-link">&larr; Voltar ao Menu Principal</a>
+        
+        <header role="banner">
+            <h1>Dicionário de Definições por Voz</h1>
+            <p>Escute a definição narrada pela IA e responda gravando sua voz para dizer qual palavra é.</p>
+        </header>
+
+        <main role="main">
+            <section class="game-card" aria-label="Área do dicionário interativo">
+                <h2>Qual é a palavra?</h2>
+
+                <div id="status" class="status-box" role="status" aria-live="polite">
+                    Pressione "Ouvir Definição" para começar.
+                </div>
+
+                <div class="controls">
+                    <button id="btn-speak" class="btn" onclick="falarDefinicao()">
+                        🔊 Ouvir Definição da IA
+                    </button>
+
+                    <button id="btn-record" class="btn btn-record" onclick="alternarGravacao()">
+                        🎙️ Gravar Resposta por Voz
+                    </button>
+                </div>
+
+                <div id="transcript" class="transcript-box" aria-live="polite"></div>
+            </section>
+        </main>
+    </div>
+
+    <script>
+        const definicoes = [
+            { palavra: "casa", significado: "Construção feita pelo ser humano destinada à habitação para proteger da chuva e do frio." },
+            { palavra: "escola", significado: "Instituição criada para o ensino e aprendizagem de alunos, com professores e salas de aula." },
+            { palavra: "sofá", significado: "Móvel estofado com encosto e braços, feito para duas ou mais pessoas se sentarem confortavelmente." },
+            { palavra: "sinceridade", significado: "Atributo da pessoa que é verdadeira, direta e fala a verdade sem fingimentos." },
+            { palavra: "computador", significado: "Máquina eletrônica capaz de processar dados, acessar a internet e executar programas." },
+            { palavra: "piscina", significado: "Tanque de água construído para natação, mergulho e lazer em dias quentes." }
+        ];
+
+        let rodadaAtual = 0;
+        let gravando = false;
+        let recognition = null;
+
+        if ('webkitSpeechRecognition' in window || 'SpeechRecognition' in window) {
+            const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
+            recognition = new SpeechRecognition();
+            recognition.lang = 'pt-BR';
+            recognition.continuous = false;
+
+            recognition.onresult = (event) => {
+                const respostaUsuario = event.results[0][0].transcript.toLowerCase().trim();
+                document.getElementById('transcript').innerText = `Você disse: "${respostaUsuario}"`;
+                validarResposta(respostaUsuario);
+            };
+
+            recognition.onerror = () => {
+                falar("Não consegui entender a sua voz. Tente gravar novamente.");
+            };
+
+            recognition.onend = () => {
+                gravando = false;
+                const btn = document.getElementById('btn-record');
+                btn.classList.remove('recording');
+                btn.innerText = "🎙️ Gravar Resposta por Voz";
+            };
+        }
+
+        function falar(texto, aoFinalizar) {
+            window.speechSynthesis.cancel();
+            const utterance = new SpeechSynthesisUtterance(texto);
+            utterance.lang = 'pt-BR';
+            if (aoFinalizar) utterance.onend = aoFinalizar;
+            window.speechSynthesis.speak(utterance);
+            document.getElementById('status').innerText = texto;
+        }
+
+        function falarDefinicao() {
+            const significado = definicoes[rodadaAtual].significado;
+            falar(`Definição: ${significado}`);
+        }
+
+        function alternarGravacao() {
+            if (!recognition) {
+                alert("Seu navegador não suporta reconhecimento de voz.");
+                return;
+            }
+
+            const btn = document.getElementById('btn-record');
+            if (!gravando) {
+                gravando = true;
+                window.speechSynthesis.cancel();
+                btn.classList.add('recording');
+                btn.innerText = "🛑 Gravando... Fale a palavra correspondente";
+                recognition.start();
+            } else {
+                recognition.stop();
+            }
+        }
+
+        function validarResposta(resposta) {
+            const palavraCorreta = definicoes[rodadaAtual].palavra;
+
+            if (resposta.includes(palavraCorreta)) {
+                falar(`Excelente! A palavra é ${palavraCorreta}!`, () => {
+                    rodadaAtual = (rodadaAtual + 1) % definicoes.length;
+                    setTimeout(() => {
+                        falar(`Próxima definição: ${definicoes[rodadaAtual].significado}`);
+                    }, 1000);
+                });
+            } else {
+                falar(`Ainda não é essa palavra. Você disse ${resposta}. Tente gravar novamente.`);
+            }
+        }
+    </script>
+</body>
+</html>
