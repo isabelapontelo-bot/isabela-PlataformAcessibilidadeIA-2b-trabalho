@@ -1,0 +1,238 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Plataforma de Acessibilidade Assistida por IA - Menu Principal</title>
+    <style>
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+        }
+
+        :root {
+            --bg-color: #0f172a;
+            --card-bg: #1e293b;
+            --card-border: #334155;
+            --text-main: #ffffff;
+            --text-sub: #cbd5e1;
+            --accent-yellow: #facc15;
+            --accent-blue: #38bdf8;
+            --accent-green: #4ade80;
+            --focus-ring: #facc15;
+        }
+
+        body {
+            font-family: Arial, Helvetica, sans-serif;
+            background-color: var(--bg-color);
+            color: var(--text-main);
+            line-height: 1.6;
+            padding: 20px;
+        }
+
+        .skip-link {
+            position: absolute;
+            top: -50px;
+            left: 10px;
+            background: var(--accent-yellow);
+            color: #000;
+            padding: 10px 20px;
+            font-weight: bold;
+            text-decoration: none;
+            z-index: 100;
+            border-radius: 4px;
+            transition: top 0.2s ease;
+        }
+
+        .skip-link:focus {
+            top: 10px;
+        }
+
+        header {
+            max-width: 1200px;
+            margin: 0 auto 40px auto;
+            text-align: center;
+            border-bottom: 2px solid var(--card-border);
+            padding-bottom: 20px;
+        }
+
+        header h1 {
+            font-size: 2.5rem;
+            color: var(--accent-yellow);
+            margin-bottom: 12px;
+        }
+
+        header p {
+            font-size: 1.25rem;
+            color: var(--text-sub);
+            max-width: 800px;
+            margin: 0 auto;
+        }
+
+        main {
+            max-width: 1200px;
+            margin: 0 auto;
+        }
+
+        .cards-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(320px, 1fr));
+            gap: 30px;
+        }
+
+        .card {
+            background-color: var(--card-bg);
+            border: 3px solid var(--card-border);
+            border-radius: 12px;
+            padding: 28px;
+            display: flex;
+            flex-direction: column;
+            justify-content: space-between;
+            transition: border-color 0.2s, transform 0.2s;
+        }
+
+        .card:hover, .card:focus-within {
+            border-color: var(--accent-yellow);
+            transform: translateY(-4px);
+        }
+
+        .card-number {
+            display: inline-block;
+            background-color: #000000;
+            color: var(--accent-yellow);
+            font-weight: bold;
+            font-size: 1.1rem;
+            padding: 4px 12px;
+            border-radius: 6px;
+            border: 1px solid var(--accent-yellow);
+            margin-bottom: 15px;
+            width: fit-content;
+        }
+
+        .card h2 {
+            font-size: 1.8rem;
+            color: #ffffff;
+            margin-bottom: 15px;
+        }
+
+        .card-description {
+            font-size: 1.1rem;
+            color: var(--text-sub);
+            margin-bottom: 25px;
+            flex-grow: 1;
+        }
+
+        .btn-access {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            gap: 10px;
+            background-color: var(--accent-yellow);
+            color: #000000;
+            font-size: 1.25rem;
+            font-weight: bold;
+            padding: 16px 24px;
+            border: 3px solid #ffffff;
+            border-radius: 8px;
+            text-decoration: none;
+            text-align: center;
+            transition: background-color 0.2s, color 0.2s;
+        }
+
+        .btn-access:hover {
+            background-color: #ffffff;
+            color: #000000;
+        }
+
+        .btn-access:focus {
+            outline: 4px solid var(--focus-ring);
+            outline-offset: 3px;
+        }
+
+        .btn-quiz {
+            background-color: var(--accent-yellow);
+        }
+
+        .btn-animal {
+            background-color: var(--accent-blue);
+        }
+
+        .btn-dictionary {
+            background-color: var(--accent-green);
+        }
+
+        footer {
+            max-width: 1200px;
+            margin: 50px auto 0 auto;
+            text-align: center;
+            color: var(--text-sub);
+            border-top: 1px solid var(--card-border);
+            padding-top: 20px;
+            font-size: 1rem;
+        }
+    </style>
+</head>
+<body>
+
+    <a href="#menu-principal" class="skip-link">Pular para o menu de ferramentas</a>
+
+    <header role="banner">
+        <h1>Plataforma de Acessibilidade Assistida por IA</h1>
+        <p>Selecione uma das ferramentas abaixo para acessar a página correspondente. Todas as páginas possuem suporte para comandos de voz e leitor de tela.</p>
+    </header>
+
+    <main id="menu-principal" role="main">
+        <section class="cards-grid" aria-label="Menu principal de ferramentas de acessibilidade">
+
+            <!-- CARD 1: QUIZ ACESSÍVEL (MANTIDO ORIGINAL) -->
+            <article class="card">
+                <div>
+                    <span class="card-number" aria-hidden="true">Opção 01</span>
+                    <h2>Quiz Acessível por Voz</h2>
+                    <p class="card-description">
+                        Jogo interativo onde a Inteligência Artificial faz perguntas faladas, permite gravar sua resposta em áudio e confirma o resultado por voz sintética.
+                    </p>
+                </div>
+                <a href="quiz.html" class="btn-access btn-quiz" aria-label="Acessar página do Quiz Acessível por Voz">
+                    Acessar Quiz &rarr;
+                </a>
+            </article>
+
+            <!-- CARD 2: JOGO DE ADIVINHAÇÃO DOS ANIMAIS -->
+            <article class="card">
+                <div>
+                    <span class="card-number" aria-hidden="true">Opção 02</span>
+                    <h2>Adivinhação de Animais por Voz</h2>
+                    <p class="card-description">
+                        A Inteligência Artificial descreve as características de um animal (como cavalo, gato ou pássaro) e você responde gravando sua voz para adivinhar qual é.
+                    </p>
+                </div>
+                <a href="animais.html" class="btn-access btn-animal" aria-label="Acessar Jogo de Adivinhação de Animais por Voz">
+                    Acessar Animais &rarr;
+                </a>
+            </article>
+
+            <!-- CARD 3: DICIONÁRIO E DEFINIÇÕES POR VOZ -->
+            <article class="card">
+                <div>
+                    <span class="card-number" aria-hidden="true">Opção 03</span>
+                    <h2>Dicionário de Definições por Voz</h2>
+                    <p class="card-description">
+                        A Inteligência Artificial narra o significado de diversas palavras e conceitos. Use sua voz para gravar e responder qual palavra está sendo definida.
+                    </p>
+                </div>
+                <a href="dicionario.html" class="btn-access btn-dictionary" aria-label="Acessar Dicionário de Definições por Voz">
+                    Acessar Dicionário &rarr;
+                </a>
+            </article>
+
+        </section>
+    </main>
+
+    <footer role="contentinfo">
+        <p>Plataforma desenvolvida sob as diretrizes de acessibilidade WCAG 2.1.</p>
+    </footer>
+
+</body>
+</html>
