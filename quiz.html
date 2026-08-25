@@ -1,0 +1,180 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Quiz Acessível por Voz - IA</title>
+    <style>
+        * { box-sizing: border-box; margin: 0; padding: 0; }
+        :root {
+            --bg-color: #0f172a;
+            --card-bg: #1e293b;
+            --card-border: #334155;
+            --text-main: #ffffff;
+            --accent-yellow: #facc15;
+            --accent-green: #4ade80;
+            --focus-ring: #facc15;
+        }
+        body {
+            font-family: Arial, Helvetica, sans-serif;
+            background-color: var(--bg-color);
+            color: var(--text-main);
+            padding: 20px;
+            line-height: 1.6;
+        }
+        .container { max-width: 800px; margin: 0 auto; }
+        .nav-back {
+            display: inline-block;
+            background: #334155;
+            color: #fff;
+            padding: 10px 20px;
+            text-decoration: none;
+            border-radius: 6px;
+            font-weight: bold;
+            margin-bottom: 20px;
+            border: 2px solid #fff;
+        }
+        .nav-back:focus { outline: 4px solid var(--focus-ring); }
+        header h1 { color: var(--accent-yellow); margin-bottom: 10px; font-size: 2.2rem; }
+        .card {
+            background: var(--card-bg);
+            border: 3px solid var(--card-border);
+            border-radius: 12px;
+            padding: 30px;
+            margin-top: 20px;
+        }
+        .status-box {
+            background: #0f172a;
+            border-left: 6px solid var(--accent-yellow);
+            padding: 15px;
+            margin: 20px 0;
+            font-size: 1.2rem;
+            min-height: 80px;
+        }
+        .btn {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            background: var(--accent-yellow);
+            color: #000;
+            font-size: 1.2rem;
+            font-weight: bold;
+            padding: 16px 28px;
+            border: 3px solid #fff;
+            border-radius: 8px;
+            cursor: pointer;
+            margin-bottom: 15px;
+            width: 100%;
+        }
+        .btn-record { background: var(--accent-green); }
+        .btn:focus { outline: 4px solid var(--focus-ring); outline-offset: 3px; }
+        .recording { animation: pulse 1.5s infinite; background: #ef4444 !important; color: #fff !important; }
+        @keyframes pulse { 0% { opacity: 1; } 50% { opacity: 0.5; } 100% { opacity: 1; } }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <a href="index.html" class="nav-back">&larr; Voltar ao Menu Principal</a>
+        <header>
+            <h1>Quiz Acessível por Voz</h1>
+            <p>A IA dirá uma pergunta em voz alta. Clique no botão de gravar, fale sua resposta e a IA responderá se está correto.</p>
+        </header>
+
+        <main>
+            <section class="card">
+                <button id="btnPlayQuestion" class="btn">🔊 Ouvir Pergunta da IA</button>
+                
+                <div class="status-box" id="questionText" aria-live="polite">
+                    <strong>Pergunta:</strong> Clique em "Ouvir Pergunta da IA" para iniciar.
+                </div>
+
+                <button id="btnRecord" class="btn btn-record">🎙️ Gravar Resposta por Áudio</button>
+
+                <div class="status-box" id="feedbackText" style="border-left-color: var(--accent-green);" aria-live="polite">
+                    <strong>Sua Resposta / Feedback da IA:</strong> Aguardando áudio...
+                </div>
+            </section>
+        </main>
+    </div>
+
+    <script>
+        const questions = [
+            { question: "Qual é a capital do Brasil?", answers: ["brasília", "brasilia"] },
+            { question: "Quanto é 5 mais 5?", answers: ["10", "dez"] },
+            { question: "Qual é a cor do céu em um dia ensolarado?", answers: ["azul"] }
+        ];
+
+        let currentIdx = 0;
+        const btnPlay = document.getElementById('btnPlayQuestion');
+        const btnRecord = document.getElementById('btnRecord');
+        const questionText = document.getElementById('questionText');
+        const feedbackText = document.getElementById('feedbackText');
+
+        function speak(text, callback) {
+            window.speechSynthesis.cancel();
+            const utterance = new SpeechSynthesisUtterance(text);
+            utterance.lang = 'pt-BR';
+            utterance.rate = 1.0;
+            if (callback) utterance.onend = callback;
+            window.speechSynthesis.speak(utterance);
+        }
+
+        function loadQuestion() {
+            const q = questions[currentIdx].question;
+            questionText.innerHTML = `<strong>Pergunta:</strong> ${q}`;
+            speak(q);
+        }
+
+        btnPlay.addEventListener('click', loadQuestion);
+
+        const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
+
+        if (SpeechRecognition) {
+            const recognition = new SpeechRecognition();
+            recognition.lang = 'pt-BR';
+            recognition.continuous = false;
+
+            btnRecord.addEventListener('click', () => {
+                recognition.start();
+                btnRecord.classList.add('recording');
+                btnRecord.innerText = "🔴 Gravando... Fale sua resposta agora!";
+            });
+
+            recognition.onresult = (event) => {
+                btnRecord.classList.remove('recording');
+                btnRecord.innerText = "🎙️ Gravar Resposta por Áudio";
+                
+                const userSpeech = event.results[0][0].transcript.toLowerCase().trim();
+                const validAnswers = questions[currentIdx].answers;
+
+                let isCorrect = validAnswers.some(ans => userSpeech.includes(ans));
+                let feedbackMsg = "";
+
+                if (isCorrect) {
+                    feedbackMsg = `Você respondeu: "${userSpeech}". Resposta correta! Parabéns.`;
+                } else {
+                    feedbackMsg = `Você respondeu: "${userSpeech}". Resposta incorreta. Tente novamente!`;
+                }
+
+                feedbackText.innerHTML = `<strong>Feedback:</strong> ${feedbackMsg}`;
+                speak(feedbackMsg, () => {
+                    if (isCorrect) {
+                        currentIdx = (currentIdx + 1) % questions.length;
+                        setTimeout(loadQuestion, 1500);
+                    }
+                });
+            };
+
+            recognition.onerror = () => {
+                btnRecord.classList.remove('recording');
+                btnRecord.innerText = "🎙️ Gravar Resposta por Áudio";
+                const err = "Não consegui ouvir sua resposta. Por favor, tente novamente.";
+                feedbackText.innerHTML = `<strong>Erro:</strong> ${err}`;
+                speak(err);
+            };
+        } else {
+            alert("Navegador não suporta reconhecimento de voz.");
+        }
+    </script>
+</body>
+</html>
